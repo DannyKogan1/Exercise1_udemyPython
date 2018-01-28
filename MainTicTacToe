@@ -1,0 +1,55 @@
+# This Script is the first exercise in Udemy python Course.
+# This was written By Danny Kogan 28.01.2018
+
+# Intializng Game board
+# 'X', 'O', '' are the three poosible inputs
+global board
+board = [[" ", " ", " "], [" ", " ", " "], [" ", " ", " "]]
+def Print_Board ():
+    # This function will print the board to the user
+    print("     |    |    ")
+    print("" + board[0][0] + "    | " + board[0][1] + "  |   " + board[0][2])
+    print("     |    |    ")
+    print("---------------")
+    print("     |    |    ")
+    print("" + board[1][0] + "    | " + board[1][1] + "  | " + board[1][2])
+    print("     |    |    ")
+    print("-----------------")
+    print("     |    |    ")
+    print("" + board[2][0] + "    | " + board[2][1] + "  |" + board[2][2])
+    print("     |    |    ")
+def VerifyInput (location):
+    '''
+    # Description : The function will return row and coulum choosen by the user,if the input is wrong
+    # It will ask it again
+    #location -  is a string recevied from the user.
+    '''
+
+    error_flag = True;
+    # Input should be in this 'format r,c'
+    if len(location) > 3:
+        print(" Please Make Sure There is  only 3 characters in Your Input")
+        error_flag = False;
+    # Input should contain location in coordinates
+    if not location[0].isdigit() and not (location[2].isdigit()):
+        print(" Please Make Sure That your last and first Characters are digits")
+        error_flag = False;
+    # Input should contain coordinates in A range 0-2
+    if (int(location[0]) not in range(0, 2)) and (int(location[2]) not in range(0, 2)):
+        print(" Please Make Sure That your digits is in the Range of 0-2")
+        error_flag = False;
+    return error_flag
+def player_turn(player_sign):
+     # Description : this will interface each player while playing his turn
+     # playerSign is char indicates which player turn it is X/O
+     global board
+     valid_input = False
+     # Loop until the right arrives
+     while not valid_input :
+        location = input(" It's " + player_sign + " Turn. Please Choose your location by  R,C ")
+        valid_input = VerifyInput (location);
+     #assign player in right place on the board
+     board [ int(location[0]) ] [ int(location[2]) ] = player_sign
+Print_Board ()
+player_turn('X')
+Print_Board ()
