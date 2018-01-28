@@ -8,10 +8,14 @@ Build the first exercise in python course BootCamp
 - [ ] flow chart
 
 ### Function Description
-  Basics: The board will be simulated as a 2D array (N x N size)
-  #### output_args = UI_function (input args)
-      1. Print the board
-      2. tell which player plays current turn
+  Basics: The board will be simulated as a list in lisr the first element in the list will be the first row ans so on
+  #### printBoard 
+      Print the board
+  #### PlayerTurn 
+   Description : this will interface each player while playing his turn
+  #### VerifyInput 
+    The function will return row and coulum choosen by the user,if the input is wrong  
+  
   #### output_args = CeckWinner (input args)
       1. Starting from 5th turn will check if there is a winner
       2. In case there is a winner return his identity. (X/O)
