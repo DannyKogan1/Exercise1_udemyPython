@@ -1,10 +1,6 @@
 # This Script is the first exercise in Udemy python Course.
 # This was written By Danny Kogan 28.01.2018
 
-# Intializng Game board
-# 'X', 'O', '' are the three poosible inputs
-global board
-board = [[" ", " ", " "], [" ", " ", " "], [" ", " ", " "]]
 def Print_Board ():
     # This function will print the board to the user
     print("     |    |    ")
@@ -35,7 +31,7 @@ def VerifyInput (location):
         print(" Please Make Sure That your last and first Characters are digits")
         error_flag = False;
     # Input should contain coordinates in A range 0-2
-    if (int(location[0]) not in range(0, 2)) and (int(location[2]) not in range(0, 2)):
+    if (int(location[0]) not in range(0, 3)) and (int(location[2]) not in range(0, 3)):
         print(" Please Make Sure That your digits is in the Range of 0-2")
         error_flag = False;
     return error_flag
@@ -50,6 +46,76 @@ def player_turn(player_sign):
         valid_input = VerifyInput (location);
      #assign player in right place on the board
      board [ int(location[0]) ] [ int(location[2]) ] = player_sign
-Print_Board ()
-player_turn('X')
-Print_Board ()
+     # return current player location choices
+     return [int(location[0]),int(location[0])]
+def find_in_list_of_list(mylist, char):
+    counter = 0
+    for sub_list in mylist:
+        if char in sub_list:
+            counter += 1;
+    raise ValueError("'{char}' is not in list".format(char = char))
+def checkWinner(current_location):
+    '''
+        this function will return true if the current board assigment is
+        a one with a winner. In case the board is full will return Draw
+        Input: current location indicates player choice at the current turn.
+        basic assumption will be that current location will be a part from
+        the wining row/col
+    '''
+    global board
+    global binary_board
+    global symbol_flag
+    # define winner template for comparison reasons
+    winner_temp1 = [1., 1., 1.] #'X'
+    winner_temp2 = [2., 2., 2.] # 'O'
+    # check row coulum diagonal
+    # anti diagonal check
+    counter_antidiag = 0;
+    for i in range(0,N-1):
+        if binary_board[ N - i - 1 , i] == symbol:
+            counter_antidiag += 1
+    return (((binary_board[:, current_location[1] ] - symbol_flag) == 0).all()) \
+            or (((binary_board[:, current_location[0]] - symbol_flag) == 0).all())\
+            or ((binary_board.diag () - symbol_flag).all() == 0)\
+            or  counter_antidiag == N
+
+
+
+    return counter_antidiag == N
+
+def switchSymbols ():
+        global symbol
+        global symbol_flag
+        if  symbol is "X" :
+            symbol = "O"
+            symbol_flag = 2
+        else :
+            symbol = "X"
+            symbol_flag = 1
+
+# Intializng Game board
+# 'X', 'O', '' are the three poosible inputs
+N = 3;
+import numpy
+global binary_board
+binary_board = numpy.zeros((N, N))
+global board
+board = [[" ", " ", " "], [" ", " ", " "], [" ", " ", " "]]
+global symbol_flag
+symbol_flag = '1'
+global symbol
+symbol = "X"
+for i in range (1,N**2):
+    Print_Board ()
+    current_location =  player_turn(symbol)
+    binary_board[tuple(current_location)] = symbol_flag
+    if(i > 2*N - 1):
+        victory = checkWinner(current_location)
+        if (victory ):
+            print(symbol + "Has Won!!!")
+            break
+
+    switchSymbols()
+
+if not victory:
+    print("Draw")
