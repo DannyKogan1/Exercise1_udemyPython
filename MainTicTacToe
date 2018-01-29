@@ -75,16 +75,8 @@ def checkWinner(current_location):
     row = (((binary_board[current_location[0],:] - symbol_flag) == 0).all())
     diag = (((binary_board[current_location[0],:] - symbol_flag) == 0).all())
     anti_diag = counter_antidiag == N
-    print(current_location[1])
-    print(col)
-    print(current_location[0])
-    print(row)
-
     return  row or col or diag or anti_diag
 
-
-
-    return counter_antidiag == N
 def switchSymbols ():
         global symbol
         global symbol_flag
