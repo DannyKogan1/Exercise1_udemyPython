@@ -20,44 +20,44 @@ def VerifyInput (location):
     # It will ask it again
     #location -  is a string recevied from the user.
     '''
-
-    error_flag = True;
+    global binary_board
     # Input should be in this 'format r,c'
-    if len(location) > 3:
+    if len(location) != 3:
         print(" Please Make Sure There is  only 3 characters in Your Input")
-        error_flag = False;
+        return False;
     # Input should contain location in coordinates
-    if not location[0].isdigit() and not (location[2].isdigit()):
+    elif not (location[0].isdigit()) or not (location[2].isdigit()):
         print(" Please Make Sure That your last and first Characters are digits")
-        error_flag = False;
+        return False
     # Input should contain coordinates in A range 0-2
-    if (int(location[0]) not in range(0, 3)) and (int(location[2]) not in range(0, 3)):
+    elif (int(location[0]) not in range(0, 3)) and (int(location[2]) not in range(0, 3)):
         print(" Please Make Sure That your digits is in the Range of 0-2")
-        error_flag = False;
-    return error_flag
-def player_turn(player_sign):
+        return False
+    # Input should contain coordinates in A range 0-2
+    elif binary_board[ int(location[0]), int(location[2])] != 0 :
+        print(" Please Make Sure That Your Selection  has not Been Chosen Yet ")
+        return False
+    return True
+def player_turn(player_sign,symbol_flag):
      # Description : this will interface each player while playing his turn
      # playerSign is char indicates which player turn it is X/O
      global board
+     global binary_board
      valid_input = False
      # Loop until the right arrives
-     while not valid_input :
+     while not valid_input:
         location = input(" It's " + player_sign + " Turn. Please Choose your location by  R,C ")
-        valid_input = VerifyInput (location);
+        valid_input = VerifyInput (location)
+
      #assign player in right place on the board
-     board [ int(location[0]) ] [ int(location[2]) ] = player_sign
-     # return current player location choices
-     return [int(location[0]),int(location[0])]
-def find_in_list_of_list(mylist, char):
-    counter = 0
-    for sub_list in mylist:
-        if char in sub_list:
-            counter += 1;
-    raise ValueError("'{char}' is not in list".format(char = char))
+     board [int(location[0])][int(location[2])] = player_sign
+     binary_board[int(location[0]),int(location[2])] = symbol_flag
+    # return current player location choices
+     return [int(location[0]),int(location[2])]
 def checkWinner(current_location):
     '''
         this function will return true if the current board assigment is
-        a one with a winner. In case the board is full will return Draw
+        a one with a winner.
         Input: current location indicates player choice at the current turn.
         basic assumption will be that current location will be a part from
         the wining row/col
@@ -65,24 +65,26 @@ def checkWinner(current_location):
     global board
     global binary_board
     global symbol_flag
-    # define winner template for comparison reasons
-    winner_temp1 = [1., 1., 1.] #'X'
-    winner_temp2 = [2., 2., 2.] # 'O'
-    # check row coulum diagonal
     # anti diagonal check
     counter_antidiag = 0;
-    for i in range(0,N-1):
-        if binary_board[ N - i - 1 , i] == symbol:
+    # Anti diagonal check by counting symbol appernces on the diagonal
+    for num in range(0, N):
+        if binary_board[N - num - 1, num] == symbol:
             counter_antidiag += 1
-    return (((binary_board[:, current_location[1] ] - symbol_flag) == 0).all()) \
-            or (((binary_board[:, current_location[0]] - symbol_flag) == 0).all())\
-            or ((binary_board.diag () - symbol_flag).all() == 0)\
-            or  counter_antidiag == N
+    col  =(((binary_board[:, current_location[1]] - symbol_flag) == 0).all())
+    row = (((binary_board[current_location[0],:] - symbol_flag) == 0).all())
+    diag = (((binary_board[current_location[0],:] - symbol_flag) == 0).all())
+    anti_diag = counter_antidiag == N
+    print(current_location[1])
+    print(col)
+    print(current_location[0])
+    print(row)
+
+    return  row or col or diag or anti_diag
 
 
 
     return counter_antidiag == N
-
 def switchSymbols ():
         global symbol
         global symbol_flag
@@ -95,7 +97,7 @@ def switchSymbols ():
 
 # Intializng Game board
 # 'X', 'O', '' are the three poosible inputs
-N = 3;
+N = 3
 import numpy
 global binary_board
 binary_board = numpy.zeros((N, N))
@@ -105,17 +107,20 @@ global symbol_flag
 symbol_flag = '1'
 global symbol
 symbol = "X"
-for i in range (1,N**2):
-    Print_Board ()
-    current_location =  player_turn(symbol)
-    binary_board[tuple(current_location)] = symbol_flag
-    if(i > 2*N - 1):
+for turn in range(0, N**2):
+    Print_Board()
+    current_location = player_turn(symbol,symbol_flag)
+    # check for victory only after 2*N - 1 moves
+    if turn >= 2*N - 2:
         victory = checkWinner(current_location)
-        if (victory ):
-            print(symbol + "Has Won!!!")
+        # if there is victory break
+        if victory:
+            print(symbol + " Has Won!!!")
+            Print_Board()
             break
-
+    # replacing between the players
     switchSymbols()
 
 if not victory:
+    Print_Board()
     print("Draw")
