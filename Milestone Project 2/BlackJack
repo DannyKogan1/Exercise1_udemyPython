@@ -1,0 +1,152 @@
+# Python bootcamp Course mile Stone Project 2 -     Black Jack
+import random
+suits = {"Hearts": "♥", "Spades": "♠", "Diamonds": "♦", "Clubs": "♣"}
+############ Classes Definitions ###############
+class Card(object):
+
+    # default card is an Ace Hearts
+    def __init__(self, rank="Ace", suite=suits["Hearts"]):
+        self.Rank = rank
+        self.Suite = suite
+    def getRank(self):
+
+         return self.Rank
+    def getSuite(self):
+        return self.Suite
+    def __str__(self):
+        return "{} {}".format(self.Rank, self.Suite)
+    def BJValue(self, ace_value = 11 ):
+        # Return the value of self in a Black Jack game
+        # ace value is decided by the player who owns the card according to the other cards
+        if self.Rank == 'Ace':
+            return ace_value
+        elif self.Rank == 'Jack' or self.Rank == 'Queen' or self.Rank == 'King':
+            return 10
+        else:
+            return int(self.Rank)
+class Player(object):
+    def __init__(self, name = "player", money = 0):
+        '''
+        Initalizing player's attributes name and money.
+        money - amount of money that the player  currently posses (not including betting money )
+        role - role of player (controlling / non controlling/ dealer  )
+        name - player's name
+        pack_of_cards - cards received by the player in a list
+        '''
+        self.Name = str(name)
+        self.Hand = []
+        # if a player is a dealer it doesn't need a wallet
+        self.Wallet = money
+    def add_money (self, amount):
+        """: type amount: addMoney adds money to each player wallet
+        in case he is not a dealer
+        """
+        self.Wallet = self.Wallet + amount
+    def get_card(self, card):
+         '''
+         :param card: Card object that the player id going receive from the dealer
+          '''
+         # add card to player's pack of cards
+         self.Hand.append(card)
+    def __str__(self):
+        return "Wallet: {} $".format( str(self.Wallet) )
+    def print_Hand(self):
+        # print the hand of the player ,i.e. the cards he got so far from the dealer
+        # including the count of the hand
+        count = 0
+        print(self.Name)
+        for card in self.Hand:
+            print(card)
+            # In case the value exceeds the value of 21
+            if(card.getRank() == "Ace"):
+                if(count > 21):
+                    count += card.BJValue(1)
+            count += card.BJValue()
+
+        print("Count:" + str(count))
+        # BLACKJACK!!
+        if (count == 21):
+            print("BlackJack!!")
+        print(self)
+        print("\n")
+class  Deck(object):
+    # This object will simulate the playing cards dealt by the dealer
+    def __init__(self, num_of_packs = 1):
+        #Creates a list representing deck of cards
+        self.NumofPacks = num_of_packs
+        self.Pack = []
+        for suite in ['Clubs', 'Diamonds', 'Hearts', 'Spades']:
+            for num in ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']:
+                # add to list num_of_packs type of cards
+                self.Pack.extend([Card(num, suits[suite])]*num_of_packs)
+    def shuffle (self):
+        # shuffle the pack of cards
+         random.shuffle(self.Pack)
+    def print_deck(self):
+        # Print the pack of cards
+        for card in self.Pack:
+            print(card) 
+    def deal_card(self):
+        # pop the first card in the pack
+        return self.Pack.pop()
+class Dealer (Player):
+    def __init__(self):
+        Player.__init__(self, "Dealer", 0)
+    def print_Hand(self):
+        '''
+        According to BJ rules, the Dealer need to expose only one card from his pair
+        '''
+        print ("Dealer")
+        print(self.Hand.pop())
+        print("\n")
+class Game(object):
+    def __init__(self, players = Player("Player 1", 100), NumofPacks = 1):
+        # players - list of player Object (Default Player 1)
+        # NumofPacks - number of card packgs in the deck
+        # Cash - the money of all betting players.
+        self.NumofPlayers = len(players)
+        self.Dealer = Dealer()
+        self.Cash = 0
+        self.Players = players
+        self.Deck = Deck(NumofPacks)
+    def first_round(self):
+        '''
+        In this method we will simulate the 1^{st} round of the BJ (Black Jack) game.
+        In BJ 1^{st} round all players Receive 2 Cards.
+        '''
+        # start by shuffling the pack of cards
+        self.Deck.shuffle()
+        # Every player get 2 cards
+        for player in self.Players:
+            player.get_card(self.Deck.Pack.pop())
+            player.get_card(self.Deck.Pack.pop())
+        # Dealer also get one card
+        self.Dealer.get_card(self.Deck.Pack.pop())
+        self.Dealer.get_card(self.Deck.Pack.pop())
+    def place_bet(self, amount):
+        '''
+        Before the dealer deal each player his cards, every player need to place a bet in the
+        cash.
+        '''
+        # In the meanwhile every player place the same amount
+        self.Cash = len(self.Players)*amount
+        # Update the players' wallet
+        for player in self.Players:
+            player.add_money(-amount)
+    def print_round(self):
+        '''
+        print the current state of the cash, as well each player & dealer cards
+        '''
+        for player in self.Players:
+            player.print_Hand()
+
+        self.Dealer.print_Hand()
+        print("Money in the Cash:" + str(self.Cash))
+##  Main
+# Intializing Players
+players = [Player("Danny", 100), Player("Benny", 100),Player("Yaakov", 100)]
+# a game with 2 packs
+game = Game(players, 2)
+game.place_bet(70)
+game.first_round()
+game.print_round()
