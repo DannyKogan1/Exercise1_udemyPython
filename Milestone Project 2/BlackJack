@@ -3,8 +3,8 @@ import random
 suits = {"Hearts": "♥", "Spades": "♠", "Diamonds": "♦", "Clubs": "♣"}
 
 ############ Classes Definitions ###############
-class Card(object):
 
+class Card(object):
     # default card is an Ace Hearts
     def __init__(self, rank="Ace", suite=suits["Hearts"]):
         self.Rank = rank
@@ -25,96 +25,141 @@ class Card(object):
             return 10
         else:
             return int(self.Rank)
+
 class Player(object):
     def __init__(self, name = "player", money = 0 , bet = 0, playing_flag = 1):
         '''
-        Initalizing player's attributes name and money.
+        Initalizing player's attributes:
         money - amount of money that the player  currently posses (not including betting money )
         name - player's name
         Hand - cards received by the player in a list
         Bet_amount - the amount will bet in the first round
-        playing_flag - 1-> player is in the game 0-> player have left the game
-        Value - the count of all cards value in Hand (list of cards)
-        split_Hand - In case of a split the new Hand will be in this attribute
-        Value_split =
+        playing_flag - 1 -> player is in the game 0-> player has left the game
+        Value - the count of all cards values in Hand (list of cards)
+
         '''
         self.Name = str(name)
         self.Hand = []
         self.Value = 0
-        # if a player is a dealer it doesn't need a wallet
         self.Wallet = money
         self.Bet_amount = bet
         self.Playing_flag = playing_flag
         self.split_Hand = []
-        self.Value_split = 0
+    
     def add_money (self, amount):
-        """: type amount: addMoney adds money to each player wallet
+        """ amount: addMoney adds money to each player wallet
         in case he is not a dealer
         """
         self.Wallet = self.Wallet + amount
-    def get_card(self, card):
+  
+  def get_card(self, card):
         '''
-        param card: Card object that the player is going receive from the dealer
+            Adding the value of the new card to the count. In case the count exceeds 21
+            Self is out of the game. IN case Ace is one of the cards, adujast his value so
+            that the count will be less than 21
         '''
-        # add card to player's pack of cards
         self.Hand.append(card)
-        # In case adding ace will exceeds 21 the value will be updated to 1
-        if(card.getRank() == "Ace"):
-              if self.Value + card.BJValue() > 21:
-                 self.Value += card.BJValue(1)
-              else:
-                  self.Value += card.BJValue()
+        if self.Value + card.BJValue() > 21:
+            if card.Rank == "Ace":
+                self.Value += card.BJValue(1)
+            elif ("Ace" in self):
+                self.Value += card.BJValue() - 10
+            else:
+             
+                # player is out of the game
+                self.Value += card.BJValue()
+                self.Playing_flag = 0
+                print("21 is exceeded,See you Next Round")
         else:
             self.Value += card.BJValue()
-        if self.Value > 21:
-            # player is out of the game
-            self.Playing_flag = 0
-            print("21 is exceeded,See you Next Round")
-    def victory_case(self):
-        if self.Value == 21:
-            return True
-    def __str__(self):
+    
+    def __contains__(self, rank):
+        ''' overidng the in operator. will return  True if the rank already exist in self.Hand
+         (card list).
+         Useful for times when an "ACE" is already in Hand and there is need to change his value.'''
+        # In case Hand Is empty
+        if not self.Hand:
+            return False
+        else:
+            for card in self.Hand:
+                if card.Rank == rank:
+                    return True
+            return False
+    
+    def remove_card(self):
+        '''remvoe card from  a player Hand and update the count
+        useful for the split case'''
+        if len(self.Hand) > 1:
+            temp_card = self.Hand.pop()
+            # case the card that left is "Ace" update his value to 11
+            if self.Hand[0].Rank == "Ace":
+                self.Hand[0].BJValue = 11
+                self.Value = self.Value - temp_card.BJValue() + 10
+            else:
+                self.Value = self.Value - temp_card.BJValue()
+        return temp_card
+  
+  def victory_case(self):
+            return self.Value == 21
+   
+  def __str__(self):
         return "Wallet: {} $".format( str(self.Wallet) )
-    def print(self):
+  
+  def print(self):
+     
         # print the all details about the player : cards , name, money, cards' value BJ wise.
         # In addition will announce in case of BlackJack
         print(self.Name)
         for card in self.Hand:
             print(card)
         print("Count:" + str(self.Value))
-        # BLACKJACK!!
-
+   
+   def __lt__(self, other):
+        '''
+        Operator defintion -  will be used in order to sort a list of Players
+        The Value will be used as the key.
+        '''
+        return self.Value > other.Value
+        
 class  Deck(object):
     # This object will simulate the playing cards dealt by the dealer
-    def __init__(self, num_of_packs = 1):
-        #Creates a list representing deck of cards
+   
+   def __init__(self, num_of_packs = 1):
+        # Creates a list representing deck of cards
         self.NumofPacks = num_of_packs
         self.Pack = []
-        for suite in ['Clubs', 'Diamonds', 'Hearts', 'Spades']:
+       
+       for suite in ['Clubs', 'Diamonds', 'Hearts', 'Spades']:
             for num in ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']:
                 # add to list num_of_packs type of cards
                 self.Pack.extend([Card(num, suits[suite])]*num_of_packs)
-    def shuffle (self):
-        # shuffle the pack of cards
+   
+   def shuffle (self):
+    
+    # shuffle the pack of cards
          random.shuffle(self.Pack)
+    
     def print_deck(self):
-        # Print the pack of cards
+       
+       # Print the pack of cards
         for card in self.Pack:
             print(card) 
-    def deal_card(self):
-        # pop the first card in the pack
-        return self.Pack.pop()
+
 class Dealer (Player):
-    def __init__(self):
+   
+   def __init__(self):
         Player.__init__(self, "Dealer", 0)
-    def print(self):
+   
+   def print(self):
         '''
         According to BJ rules, the Dealer need to expose only one card from his pair
         '''
         print("Dealer")
         print(self.Hand.pop())
         print("\n")
+
 class Game(object):
+    
     def __init__(self, players = Player("Player 1", 100), NumofPacks = 1):
         # players - list of player Object (Default Player 1)
         # NumofPacks - number of card packgs in the deck
@@ -127,23 +172,35 @@ class Game(object):
         self.Deck = Deck(NumofPacks)
         self.Cash_split = 0
         self.victory_flag = 0
+        self.Winner = []
+    
     def first_round(self):
+        
         '''
         In this method we will simulate the 1^{st} round of the BJ (Black Jack) game.
         In BJ 1^{st} round all players Receive 2 Cards.
         '''
         # start by shuffling the pack of cards
         self.Deck.shuffle()
+        
         # Every player gets 2 cards
+        
         for player in self.Players:
             player.get_card(self.Deck.Pack.pop())
             player.get_card(self.Deck.Pack.pop())
             if player.victory_case():
                 self.victory_flag = 1
-                self.Winner = player
+                self.Winner.append(player)
+
+            player.print()
+            print("\n")
         # Dealer also get two cards
         self.Dealer.get_card(self.Deck.Pack.pop())
         self.Dealer.get_card(self.Deck.Pack.pop())
+        self.Players = sorted(self.Players)
+        # In Case there is winner print it
+        for winner in self.Winner:
+            print(winner.Name + " Has Won" + str(self.Cash / len(self.Winner)))
     def place_bet(self):
         '''
         Before the dealer deal each player his cards, every player need to place a bet in the
@@ -154,54 +211,104 @@ class Game(object):
         for player in (self.Players):
             player.add_money(-player.Bet_amount)
             self.Cash += player.Bet_amount
-    def print_round(self):
+    def round(self, round_number):
         '''
-        print the current state of the cash, as well each player & dealer cards
-        of all playing players
+        step 1: sort list of players accoriding to Value
         '''
+        # sort PLayers according to the Value
+        sorted(self.Players)
+        # remvoe players exceeded 21 and remove them from the game according to a flag
+        # and check for winner
+        last_choice = -1
+        #self.Dealer.print()
         for player in self.Players:
-            if player.Playing_flag:
+            if not player.Playing_flag:
+                self.Players.remove(player)
+            else:
+                # In case the last player played choose split
+                if last_choice == 0:
+                    last_choice = -1
+                    continue
                 player.print()
                 print("\n")
-        self.Dealer.print()
+                # Player choice for next move
+                if round_number < 2:
+                    choice = int(input("0 - Split , 1 - Hit , 2 - Stand"))
+                else:
+                    choice = int(input("1 - Hit , 2 - Stand"))
+                print("\n")
+                if choice == 0:
+                    last_choice = 0
+                    insert_index = self.Players.index(player) + 1
+                    while( not self.Split(player)):
+                        choice = int(input("0 - Split , 1 - Hit , 2 - Stand"))
+                    player.print()
+                    self.Players[insert_index].print()
+                    print("\n")
+
+                if choice == 1:
+                    self.hit(player)
+                    player.print()
+                    print("\n")
+                if choice == 2:
+                    self.Stand(player)
+                    print("\n")
+                if player.victory_case():
+                    self.victory_flag = 1
+                    self.Winner.append(player)
+                print("\n")
+            # In case only one left
+            if len(self.Players) == 1:
+                print(self.Players[0].Name + "Has Won 1" + str(self.Cash / len(self.Winner)))
+                break
         print("Money in the Cash:" + str(self.Cash))
+        for winner in self.Winner:
+            print(winner.Name + " Has Won " + str(self.Cash/len(self.Winner)))
+    
     def hit(self, player):
         player.get_card(self.Deck.Pack.pop())
+    
     def Stand(self, player):
-        print(player.name + " is Standing")
+        print(player.Name + " is Standing")
+    
     def Split(self, player):
         '''Case the Playar has 2 cards with the same value we will allow him to split
         split will be handle as a new player
         '''
-        if player.Hand[0].BJValue != player.Hand[1].BJValue:
-            print ("You are not allowed to split")
+        if player.Hand[0].BJValue() != player.Hand[1].BJValue():
+            print("You are not allowed to split")
+            return False
         else:
-            # split in two players
-            insert_index = self.players.ind(player) + 1
-            self.players.insert(Player(player.name + " Split", player.Wallet, player.Bet_amount), insert_index)
-            players[insert_index+1].get_card(player.Hand.pop())
+           
+           # split into two players
+            insert_index = self.Players.index(player) + 1
+            self.Players.insert(insert_index, Player(player.Name + " Split", player.Wallet, player.Bet_amount))
+            self.Players[insert_index].get_card(player.remove_card())
+            
             # Dealing 2 new cards
             player.get_card(self.Deck.Pack.pop())
-            players[insert_index + 1].get_card_split(self.Deck.Pack.pop())
-            players[insert_index + 1].add_money(-player.Bet_amount)
-            self.Cash += players[insert_index + 1].Bet_amount
-    # Intializing Players
+            self.Players[insert_index].get_card(self.Deck.Pack.pop())
+            self.Players[insert_index].add_money(-player.Bet_amount)
+            self.Cash += self.Players[insert_index].Bet_amount
+            return True
 
+# Intializing Players
 ## starting a game
-#N = input("Please enter thr number of players:")
 players = []
-game_dic = {0: "Split",1:"hit",2:"Stand" }
+game_dic = {0: "Split", 1:"hit", 2:"Stand"}
 try:
-   input_file = open("Input for Black Jack game.txt" ,'r')
+   input_file = open("Input for Black Jack game.txt", 'r')
 except:
-    print("There seems to be a problem with the file...")
+    print("There seems to be a problem with the file. There Should be a test file name")
 else:
+    
     # Use input file for validation and testing process
     # defining a dictionary for removing $ from the input
     translation_table = dict.fromkeys( map(ord,'$'), None)
     # players will be the list of players playing the game
     players = list()
-    #Intializing Game
+    
+    # Intializing Game
     for line in input_file.readlines():
         words = line.translate(translation_table)
         temp_words = words.split()
@@ -214,22 +321,10 @@ else:
     game = Game(players, 2)
     game.place_bet()
     game.first_round()
-    game.print_round()
-    print("Here")
-    while not game.victory_flag:
-        for player in game.Players:
-            if player.Playing_flag:
-                 choice = int(input("0 - Split , 1 - Hit , 2 - Stand"))
-                 if choice == 0:
-                     insert_index = game.Players.ind(player) + 1
-                     game.Split(player)
-                     player.print()
-                     players[insert_index+1].print()
-                 if choice == 1:
-                     game.hit(player)
-                     player.print()
-                 if choice == 2:
-                     game.Stand(player)
 
-    print(game.Winer.Name + "Hss won the game")
-    print("Here")
+    print("\n")
+    round_number = 1
+    while not game.victory_flag:
+        game.round(round_number)
+        round_number += 1
+
