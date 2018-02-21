@@ -1,0 +1,118 @@
+# This Script is the first exercise in Udemy python Course.
+# This was written By Danny Kogan 28.01.2018
+
+def Print_Board ():
+    # This function will print the board to the user
+    print("     |    |    ")
+    print("" + board[0][0] + "    | " + board[0][1] + "  |   " + board[0][2])
+    print("     |    |    ")
+    print("---------------")
+    print("     |    |    ")
+    print("" + board[1][0] + "    | " + board[1][1] + "  | " + board[1][2])
+    print("     |    |    ")
+    print("-----------------")
+    print("     |    |    ")
+    print("" + board[2][0] + "    | " + board[2][1] + "  |" + board[2][2])
+    print("     |    |    ")
+def VerifyInput (location):
+    '''
+    # Description : The function will return row and coulum choosen by the user,if the input is wrong
+    # It will ask it again
+    #location -  is a string recevied from the user.
+    '''
+    global binary_board
+    # Input should be in this 'format r,c'
+    if len(location) != 3:
+        print(" Please Make Sure There is  only 3 characters in Your Input")
+        return False;
+    # Input should contain location in coordinates
+    elif not (location[0].isdigit()) or not (location[2].isdigit()):
+        print(" Please Make Sure That your last and first Characters are digits")
+        return False
+    # Input should contain coordinates in A range 0-2
+    elif (int(location[0]) not in range(0, 3)) and (int(location[2]) not in range(0, 3)):
+        print(" Please Make Sure That your digits is in the Range of 0-2")
+        return False
+    # Input should contain coordinates in A range 0-2
+    elif binary_board[ int(location[0]), int(location[2])] != 0 :
+        print(" Please Make Sure That Your Selection  has not Been Chosen Yet ")
+        return False
+    return True
+def player_turn(player_sign,symbol_flag):
+     # Description : this will interface each player while playing his turn
+     # playerSign is char indicates which player turn it is X/O
+     global board
+     global binary_board
+     valid_input = False
+     # Loop until the right arrives
+     while not valid_input:
+        location = input(" It's " + player_sign + " Turn. Please Choose your location by  R,C ")
+        valid_input = VerifyInput (location)
+
+     #assign player in right place on the board
+     board [int(location[0])][int(location[2])] = player_sign
+     binary_board[int(location[0]),int(location[2])] = symbol_flag
+    # return current player location choices
+     return [int(location[0]),int(location[2])]
+def checkWinner(current_location):
+    '''
+        this function will return true if the current board assigment is
+        a one with a winner.
+        Input: current location indicates player choice at the current turn.
+        basic assumption will be that current location will be a part from
+        the wining row/col
+    '''
+    global board
+    global binary_board
+    global symbol_flag
+    # anti diagonal check
+    counter_antidiag = 0;
+    # Anti diagonal check by counting symbol appernces on the diagonal
+    for num in range(0, N):
+        if binary_board[N - num - 1, num] == symbol:
+            counter_antidiag += 1
+    col  =(((binary_board[:, current_location[1]] - symbol_flag) == 0).all())
+    row = (((binary_board[current_location[0],:] - symbol_flag) == 0).all())
+    diag = (((binary_board[current_location[0],:] - symbol_flag) == 0).all())
+    anti_diag = counter_antidiag == N
+    return  row or col or diag or anti_diag
+
+def switchSymbols ():
+        global symbol
+        global symbol_flag
+        if  symbol is "X" :
+            symbol = "O"
+            symbol_flag = 2
+        else :
+            symbol = "X"
+            symbol_flag = 1
+
+# Intializng Game board
+# 'X', 'O', '' are the three poosible inputs
+N = 3
+import numpy
+global binary_board
+binary_board = numpy.zeros((N, N))
+global board
+board = [[" ", " ", " "], [" ", " ", " "], [" ", " ", " "]]
+global symbol_flag
+symbol_flag = '1'
+global symbol
+symbol = "X"
+for turn in range(0, N**2):
+    Print_Board()
+    current_location = player_turn(symbol,symbol_flag)
+    # check for victory only after 2*N - 1 moves
+    if turn >= 2*N - 2:
+        victory = checkWinner(current_location)
+        # if there is victory break
+        if victory:
+            print(symbol + " Has Won!!!")
+            Print_Board()
+            break
+    # replacing between the players
+    switchSymbols()
+
+if not victory:
+    Print_Board()
+    print("Draw")
