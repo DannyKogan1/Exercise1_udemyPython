@@ -1,0 +1,6 @@
+Danny 100$ 20$
+Benny 100$ 20$
+Yoav 100$ 20$
+Doron 100$ 20$
+Abu-Ahmed 100$ 20$
+Wallid 100$ 20$
