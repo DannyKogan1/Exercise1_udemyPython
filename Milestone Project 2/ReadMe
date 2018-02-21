@@ -2,3 +2,19 @@ In this Project I creates BlacJack game.
 
 The Rules:
   # Each participant receives 2 cards in the first round
+  
+  Player wins if the value of all of his cards counts to 21.
+  In case there isn't a winner in there in the 1st round we will play rounds until one of thw following:
+    1. 1 one or more players get to 21 in the same rpund
+    2. only one player has left in the game ane he will be the winner.
+    
+    In each round player can choose
+      1.hit - get anoter card
+      2. stand - no to get a card
+      3. split - in case the player holds 2 cards in the same value he i sallowed to split it into packs,
+      and play it, is if it's a new player.(avalible only in thw 2nd round)
+      
+ 
+ Objects in the code
+  Card , Deck, PLayer, Game
+  
